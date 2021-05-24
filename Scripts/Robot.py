@@ -39,7 +39,7 @@ GPIO.setup(2, GPIO.OUT)
 GPIO.setup(3, GPIO.IN)
 
 
-from ai import Dqn #Importing AI Deep Q learning Reinforcement algorithm
+from Brain import Dqn #Importing AI Deep Q learning Reinforcement algorithm
 
 
 
@@ -61,30 +61,21 @@ action = brain.update(last_reward, last_signal) # playing the action using the d
 scores.append(brain.score()) # appending the mean of the last 100 rewards to the reward window
 rotation = action2rotation[action] # converting the action played (0, 1 or 2) into the rotation angle (0°, 20° or -20°)
 
+fwall; #distance of the frontwall from the centre of the robot (distance from sensor + 7cm)
+rwall; #distance of the rightwall from the centre of the robot (distance from sensor + 7cm)
+lwall; #distance of the leftwall from the centre of the robot (distance from sensor + 7cm)
+bwall;#distance of the backwall from the centre of the robot (distance from sensor + 7cm)
    
    
-if wall[int(self.car.x),int(self.car.y)] > 0: # if the car is on the wall
-    self.car.velocity = Vector(1, 0).rotate(self.car.angle) # it is slowed down
+if fwall > 0: # if the car is on the wall
+    #slowed down
     last_reward = -10# and reward = -10
 else: # otherwise      
-    self.car.velocity = Vector(3, 0).rotate(self.car.angle) # maintain the normal speed
+    # maintain the normal speed
     last_reward = -0.2 # and it gets bad reward (-0.2), which is a living penalty
     if distance < last_distance: # however if it getting close to the goal
         last_reward = 0.1 # it still gets slightly positive reward 0.1
    
-    #if car is on the boundary except at the edges(goal); its gets a -10 reward
-    if (self.car.x != 0 or self.car.x !=width) and self.car.y > height-10:#if car is on the top edge of the screen                    
-        self.car.y = height - 10
-        last_reward = -10#reward = -10
-    if (self.car.x != 0 or self.car.x !=width) and self.car.y < 10:#if car is on the bottom edge of the screen
-        self.car.y =  10
-        last_reward = -10#reward = -10
-    if (self.car.y != 0 or self.car.y !=height) and self.car.x > width - 10:#if car is on the left edge of the screen
-        self.car.x = width - 10
-        last_reward = -10#reward = -10
-    if (self.car.y != 0 or self.car.y !=height) and self.car.x < 10:#if car is on the right edge of the screen
-        self.car.x =10
-        last_reward = -10#reward = -10
    
 #if if reached the goal        
 if int(distance) < 6:
