@@ -46,8 +46,8 @@ from Brain import Dqn #Importing AI Deep Q learning Reinforcement algorithm
 
 
 
-brain = Dqn(6,3,0.9) #brain of the robot; initialized globally with the imported Dqn class from ai code
-action2rotation = [0,20,-20] #To select a rotaion depending on the value of action[0(No rotation),1(rotate 20deg clockwise),2(rotate 20deg anti-clockwise)]
+brain = Dqn(6,4,0.9) #brain of the robot; initialized globally with the imported Dqn class from ai code
+action2rotation = [0,30,-30, 60] #To select a rotaion depending on the value of action[0(No rotation),1(rotate 20deg clockwise),2(rotate 20deg anti-clockwise)]
 last_reward = 0 #to record the reward it gets for certain action
 scores = [] #record the score depending on the reward
 
@@ -56,7 +56,8 @@ Initial_update = True #To ensure switch is pressed
 
            
 orientation =  # direction of the car 
-last_signal = [sensor1, sensor2, sensor3, sensor4, orientation, -orientation] # batch of inputs which includes 4 signals from the sensor and orientation and -orientation
+acceleration = #speed of the car
+last_signal = [sensor1, sensor2, sensor3, sensor4, orientation, acceleration] # batch of inputs which includes 4 signals from the sensor and orientation and -orientation
 action = brain.update(last_reward, last_signal) # playing the action using the dqn model
 scores.append(brain.score()) # appending the mean of the last 100 rewards to the reward window
 rotation = action2rotation[action] # converting the action played (0, 1 or 2) into the rotation angle (0°, 20° or -20°)
