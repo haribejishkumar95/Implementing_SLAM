@@ -13,9 +13,13 @@ import numpy as np #Importing the numpy library
 import csv
 import matplotlib.pyplot as plt
 import time
+import mpu6050 as mpu #library for mpu6050 module
 import RPi.GPIO as GPIO
 
-
+dt = 0.001 #sampling time from mpu6050 datasheet
+x_init = 0
+y_init = 0
+wz_init = 0
 GPIO.setmode(GPIO.BCM)
 
 #Pins for servo motors
@@ -118,39 +122,39 @@ with open(graph_data, 'a') as file:
        
 last_graph = graph#storing the last number of START switch pressed
 class KalmanFilter(object):
-    def __init__(self, dt, u_x,u_y, std_acc, x_std_meas, y_std_meas):
+    def __init__(self, a_x,a_y, std_acc, x_std_meas, y_std_meas):
         """
          dt: sampling time 
-         u_x: acceleration in x-direction
-         u_y: acceleration in y-direction
+         a_x: acceleration in x-direction
+         a_y: acceleration in y-direction
          std_acc: process noise magnitude
          x_std_meas: standard deviation of the measurement in x-direction
          y_std_meas: standard deviation of the measurement in y-direction
         """
         # Define sampling time
-        self.dt = dt
+        
         # Define the  control input variables
-        self.u = np.matrix([[u_x],[u_y]])
+        self.u = np.matrix([[a_x],[a_y]])
         # Intial State
         self.x = np.matrix([[0], [0], [0], [0]])
         # Define the State Transition Matrix A
-        self.A = np.matrix([[1, 0, self.dt, 0],
-                            [0, 1, 0, self.dt],
+        self.A = np.matrix([[1, 0, dt, 0],
+                            [0, 1, 0, dt],
                             [0, 0, 1, 0],
                             [0, 0, 0, 1]])
         # Define the Control Input Matrix B
-        self.B = np.matrix([[(self.dt**2)/2, 0],
-                            [0, (self.dt**2)/2],
-                            [self.dt,0],
-                            [0,self.dt]])
+        self.B = np.matrix([[(dt**2)/2, 0],
+                            [0, (dt**2)/2],
+                            [dt,0],
+                            [0,dt]])
         # Define Measurement Mapping Matrix
         self.H = np.matrix([[1, 0, 0, 0],
                             [0, 1, 0, 0]])
         #Initial Process Noise Covariance
-        self.Q = np.matrix([[(self.dt**4)/4, 0, (self.dt**3)/2, 0],
-                            [0, (self.dt**4)/4, 0, (self.dt**3)/2],
-                            [(self.dt**3)/2, 0, self.dt**2, 0],
-                            [0, (self.dt**3)/2, 0, self.dt**2]]) * std_acc**2
+        self.Q = np.matrix([[(dt**4)/4, 0, (dt**3)/2, 0],
+                            [0, (dt**4)/4, 0, (dt**3)/2],
+                            [(dt**3)/2, 0, dt**2, 0],
+                            [0, (dt**3)/2, 0, dt**2]]) * std_acc**2
         #Initial Measurement Noise Covariance
         self.R = np.matrix([[x_std_meas**2,0],
                            [0, y_std_meas**2]])
@@ -181,13 +185,12 @@ class KalmanFilter(object):
         
 T = KalmanFilter(1,1,1,1,0.1,0.1)
 print(T.x)
+z = 0
 while(True):
-    #update z
+    z +=1
+    
     T.predict()
-    T.update()#updated z is given to update function at each time
+    T.update(z)#updated z is given to update function at each time
     print(T.x)
     time.sleep(1)
 
-  
-   
-   
