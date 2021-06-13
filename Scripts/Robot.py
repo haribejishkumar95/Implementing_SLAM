@@ -17,11 +17,15 @@ import mpu6050 as mpu #library for mpu6050 module
 import RPi.GPIO as GPIO
 import math
 
-mpu = mpu6050(0x68)#specify I2C address for mpu6050 
-dt = 0.001 #sampling time from mpu6050 datasheet
-x_init = 0
-y_init = 0
-wz_init = 0
+mpu = mpu6050(0x68)
+az_scale = 2.409147082590589e-05
+g_scale = 0.000128
+sample_time = 0.001 #1kHz from mpu6050 datasheet
+
+prev_yaw = 0.0
+gdat = 0
+yaw = 0.0
+total_yaw = 0.0
 GPIO.setmode(GPIO.BCM)
 
 #Pins for servo motors
@@ -123,3 +127,21 @@ with open(graph_data, 'a') as file:
            
        
 last_graph = graph#storing the last number of START switch pressed
+"""
+Complementry filter is a method to find the orientation of an object by taking 
+slow moving signals from accelerometer and fast moving signals from a gyroscope.
+"""
+while(True):
+    adata = mpu.get_accel_data()
+    gdata = mpu.get_gyro_data()
+    gdat = (gdata['z']/131.0) - g_scale
+    z_adat = (adata['z']/16384.0) - az_scale
+    
+    yaw = 0.98*(yaw + gdat*0.001) + (0.02)*(z_adat) #complementry filter yaw calculation
+    if(yaw > 0.0007 or 0>yaw):
+        total_yaw += yaw
+    prev_yaw = yaw
+    print(yaw)
+    print(total_yaw)
+    print("*******************************")
+    time.sleep(0.001)
